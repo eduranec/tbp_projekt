@@ -113,7 +113,11 @@ class host(Document):
 DB_URI = "mongodb+srv://erik:Heets7896@cluster0.47e6x.mongodb.net/sample_airbnb?retryWrites=true&w=majority"
 
 connect(host=DB_URI, db='sample_airbnb')
-print(smjestaj.objects().first().bedrooms)
-prozor = tkinter.Tk()
-prozor.mainloop()
+window=tkinter.Tk()
+# add widgets here
+btn=tkinter.Button(window, text="This is Button widget")
+btn.place(x=80, y=100)
+window.title('Analiza smještajnih jedinica')
+window.geometry("400x600+10+20")
+window.mainloop()
 
