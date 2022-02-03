@@ -1,7 +1,69 @@
 import tkinter
 from tkinter import messagebox
 from mongoengine import *
+from tkinter import ttk
 
+
+class location(EmbeddedDocument):
+    type = StringField()
+    coordinates = ListField(DecimalField())
+    is_location_exact = BooleanField()
+
+
+class address(EmbeddedDocument):
+    street = StringField()
+    suburb = StringField()
+    government_area = StringField()
+    market = StringField()
+    country = StringField()
+    country_code = StringField()
+    location = EmbeddedDocumentField(location)
+
+
+class availability(EmbeddedDocument):
+    availability_30 = IntField()
+    availability_60 = IntField()
+    availability_90 = IntField()
+    availability_365 = IntField()
+
+
+class review_scores(EmbeddedDocument):
+    review_scores_accuracy = IntField()
+    review_scores_cleanliness = IntField()
+    review_scores_checkin = IntField()
+    review_scores_communication = IntField()
+    review_scores_location = IntField()
+    review_scores_value = IntField()
+    review_scores_rating = IntField()
+
+
+class reviews(EmbeddedDocument):
+    _id = StringField(max_length=9)
+    date = LongField()
+    listing_id = StringField()
+    reviewer_id = StringField()
+    reviewer_name = StringField()
+    comments = StringField()
+
+class host(EmbeddedDocument):
+    host_id = StringField(max_length=8)
+    host_url = StringField()
+    host_name = StringField()
+    host_location = StringField()
+    host_about = StringField()
+    host_response_time = StringField()
+    host_thumbnail_url = StringField()
+    host_picture_url = StringField()
+    host_neighbourhood = StringField()
+    host_response_rate = IntField()
+    host_is_superhost = BooleanField()
+    host_has_profile_pic = BooleanField()
+    host_identity_verified = BooleanField()
+    host_listings_count = IntField()
+    host_total_listings_count = IntField()
+    host_verifications = ListField(StringField())
+    review_scores = EmbeddedDocumentField(review_scores)
+    reviews = EmbeddedDocumentField(reviews)
 
 class smjestaj(Document):
     _id = StringField(max_length=8)
@@ -30,84 +92,26 @@ class smjestaj(Document):
     cleaning_fee = DecimalField()
     extra_people = DecimalField()
     guests_included = DecimalField()
-    host = ReferenceField('host')
-    availability = ReferenceField('availability')
+    host = EmbeddedDocumentField(host)
+    availability = EmbeddedDocumentField(availability)
     description = StringField()
     images = StringField()
     notes = StringField()
     beds = IntField()
     space = StringField()
     neighborhood_overview= StringField()
-    reviews = ReferenceField('reviews')
+    reviews = ListField(EmbeddedDocumentField(reviews))
     access = StringField()
-    review_scores = ReferenceField('review_scores')
-    address = ReferenceField('address')
+    review_scores = EmbeddedDocumentField(review_scores)
+    address = EmbeddedDocumentField(address)
     transit = StringField()
+    weekly_price = DecimalField()
+    monthly_price = DecimalField()
+    reviews_per_month = IntField()
     meta = {'collection': 'listingsAndReviews'} #EKSTREMNO KRUCIJALNA STVAR! Took me YEARS to get it
 
 
 
-
-class location(Document):
-    type = StringField()
-    coordinates = ListField(DecimalField())
-    is_location_exact = BooleanField()
-
-
-class address(Document):
-    street = StringField()
-    suburb = StringField()
-    government_area = StringField()
-    market = StringField()
-    country = StringField()
-    country_code = StringField()
-    location = ReferenceField('location')
-
-
-class availability(Document):
-    availability_30 = IntField()
-    availability_60 = IntField()
-    availability_90 = IntField()
-    availability_365 = IntField()
-
-
-class review_scores(Document):
-    review_scores_accuracy = IntField()
-    review_scores_cleanliness = IntField()
-    review_scores_checkin = IntField()
-    review_scores_communication = IntField()
-    review_scores_location = IntField()
-    review_scores_value = IntField()
-    review_scores_rating = IntField()
-
-
-class reviews(Document):
-    _id = StringField(max_length=9)
-    date = LongField()
-    listing_id = StringField()
-    reviewer_id = StringField()
-    reviewer_name = StringField()
-    comments = StringField()
-
-class host(Document):
-    host_id = StringField(max_length=8)
-    host_url = StringField()
-    host_name = StringField()
-    host_location = StringField()
-    host_about = StringField()
-    host_response_time = StringField()
-    host_thumbnail_url = StringField()
-    host_picture_url = StringField()
-    host_neighbourhood = StringField()
-    host_response_rate = IntField()
-    host_is_superhost = BooleanField()
-    host_has_profile_pic = BooleanField()
-    host_identity_verified = BooleanField()
-    host_listings_count = IntField()
-    host_total_listings_count = IntField()
-    host_verifications = ListField(StringField())
-    review_scores = ReferenceField('review_scores')
-    reviews = ReferenceField('reviews')
 
 
 def provjeraParametara(minNocenjaVar,maxNocenjaVar,brojSobaVar):
@@ -142,10 +146,23 @@ def izracunDep(minNocenjaVar,maxNocenjaVar,brojSobaVar):
 
     if(provjeraParametara(minNocenjaVar,maxNocenjaVar,brojSobaVar)):
         Rec = smjestaj.objects((Q(minimum_nights__gte=minNocenjaVar) & Q(maximum_nights__lte=maxNocenjaVar)) & Q(
-            bedrooms=brojSobaVar)).count("beds")
-        tkinter.messagebox.showinfo(title="Broj kreveta",
-                                    message="Ukupni broj kreveta za odabrane parametre: {}  ".format(Rec))
+            bedrooms=brojSobaVar)).sum("accommodates")
+        tkinter.messagebox.showinfo(title="Smještajni kapacitet",
+                                    message="Ukupni smještajni kapacitet iznosi: {} osoba  ".format(Rec))
 
+def izrKrevetZemlja (zemljaVar):
+    if(zemljaVar !=""):
+        KZ = smjestaj.objects(address__country= zemljaVar).sum("beds")
+        tkinter.messagebox.showinfo(title= "Broj kreveta", message = f"Broj kreveta za {zemljaVar} je: {KZ}")
+
+def izrSmjestajZemlja (zemljaVar):
+    SZ = smjestaj.objects(address__country = zemljaVar).count()
+    tkinter.messagebox.showinfo(title="Broj smještajnih jedinica", message=f"Broj smještajnih jedinica za {zemljaVar} je: {SZ}")
+
+def izrKapacitetZemlja (zemljaVar):
+    KapZ = smjestaj.objects(address__country = zemljaVar).sum('accommodates')
+    tkinter.messagebox.showinfo(title="Smještajni kapacitet",
+                                message=f"Broj ljudi koji mogu biti smješteni za {zemljaVar} je: {KapZ}")
 
 # Povezivanje s ATLAS MongoDB bazom sa setom podataka airbnb
 DB_URI = "mongodb+srv://erik:Heets7896@cluster0.47e6x.mongodb.net/sample_airbnb?retryWrites=true&w=majority"
@@ -159,6 +176,7 @@ window=tkinter.Tk()
 brojSobaVar = tkinter.StringVar()
 minNocenjaVar = tkinter.StringVar()
 maxNocenjaVar = tkinter.StringVar()
+zemljaVar = tkinter.StringVar()
 prosjecnaCijenaCiscenja=tkinter.Button(window, text="Prosječna cijena čišćenja",command = lambda:izracunPCC(minNocenjaVar.get(),maxNocenjaVar.get(),brojSobaVar.get()) )
 prosjecnaCijenaCiscenja.grid(column = 3, row = 0, padx= 25, pady = 30 )
 
@@ -166,11 +184,11 @@ prosjecnaCijenaGumb=tkinter.Button(window, text="Prosječna cijena smještaja",c
 prosjecnaCijenaGumb.grid (column =3, row = 1, padx= 25, pady = 30 )
 brojRecenzijaGumb= tkinter.Button(window, text="Ukupni broj kreveta",command = lambda:izracunDep(minNocenjaVar.get(),maxNocenjaVar.get(),brojSobaVar.get()))
 brojRecenzijaGumb.grid(column = 3,row = 2, padx= 25, pady = 30 )
-brojSmjestajnihJedinica= tkinter.Button(window, text="Ukupni broj smještajnih jedinica \n za odabranu zemlju")
+brojSmjestajnihJedinica= tkinter.Button(window, text="Ukupni broj smještajnih jedinica \n za odabranu zemlju", command=lambda:izrSmjestajZemlja(zemljeCombo.get()))
 brojSmjestajnihJedinica.grid(column = 1,row = 5, padx= 25, pady = 30 )
-brojKrevetaZemlja= tkinter.Button(window, text="Ukupni broj kreveta \n za odabranu zemlju")
+brojKrevetaZemlja= tkinter.Button(window, text="Ukupni broj kreveta \n za odabranu zemlju", command = lambda:izrKrevetZemlja(zemljeCombo.get()))
 brojKrevetaZemlja.grid(column = 2,row = 5, padx= 25 )
-smjestajniKapacitetZemlje= tkinter.Button(window, text="Smještajni kapacitet \n za odabranu zemlju")
+smjestajniKapacitetZemlje= tkinter.Button(window, text="Smještajni kapacitet \n za odabranu zemlju",command=lambda:izrKapacitetZemlja(zemljeCombo.get()))
 smjestajniKapacitetZemlje.grid(column = 3,row = 5, padx= 25 )
 
 otvoriDokument= tkinter.Button(window, text="Otvaranje dokumenta \n sa smještajnim jednicima")
@@ -192,9 +210,15 @@ L5 = tkinter.Label(window, text="-----Analiza pojedine zemlje-----" )
 L5.grid(row=3, column=1, pady= 20, padx=10)
 
 
-zemljaVar = ""
-zemljaEntry = tkinter.Entry(window,textvariable=zemljaVar)
-zemljaEntry.grid(row = 4, column =2, pady = 25, padx =20)
+
+
+#zemlje = set()
+#for s in smjestaj.objects():
+  #  zemlje.add(s.address.country)
+zemljeCombo = tkinter.ttk.Combobox(window)
+zemljeCombo['values']= ('Brazil', 'Portugal', 'United States', 'Canada', 'Hong Kong', 'Australia', 'Turkey', 'Spain', 'China')
+zemljeCombo.current(0)
+zemljeCombo.grid(row = 4, column =2, pady = 25, padx =20)
 
 
 
