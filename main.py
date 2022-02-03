@@ -1,5 +1,5 @@
 import tkinter
-
+from tkinter import messagebox
 from mongoengine import *
 
 
@@ -109,8 +109,43 @@ class host(Document):
     review_scores = ReferenceField('review_scores')
     reviews = ReferenceField('reviews')
 
-def izracunPCC():
-    return
+
+def provjeraParametara(minNocenjaVar,maxNocenjaVar,brojSobaVar):
+    if (minNocenjaVar == "" or maxNocenjaVar == "" or brojSobaVar == ""):
+        tkinter.messagebox.showinfo(title="Upozorenje!",
+                                    message="Unesite sva 3 parametra!!!")
+        return False
+    elif (int(maxNocenjaVar) < int(minNocenjaVar)):
+        tkinter.messagebox.showinfo(title="Upozorenje!",
+                                    message="Minimalan broj noćenja ne može biti manji od maksimalnog broja noćenja!!!")
+        return False
+    return True
+
+def izracunPCC(minNocenjaVar,maxNocenjaVar,brojSobaVar):
+
+    if(provjeraParametara(minNocenjaVar,maxNocenjaVar,brojSobaVar)):
+        PCC= smjestaj.objects((Q(minimum_nights__gte =minNocenjaVar) & Q(maximum_nights__lte =maxNocenjaVar)) & Q(bedrooms=brojSobaVar)).average("cleaning_fee")
+        PCC2=(PCC.to_decimal())
+        tkinter.messagebox.showinfo(title="Prosječna cijena čišćenja za odabrane paremetre",
+                                    message="Prosječna cijena čišćenja je: {:.2f}  $".format(PCC2))
+
+def izracunPC(minNocenjaVar,maxNocenjaVar,brojSobaVar):
+
+    if (provjeraParametara(minNocenjaVar, maxNocenjaVar, brojSobaVar)):
+        PC = smjestaj.objects((Q(minimum_nights__gte=minNocenjaVar) & Q(maximum_nights__lte=maxNocenjaVar)) & Q(
+            bedrooms=brojSobaVar)).average("price")
+        PC2 = (PC.to_decimal())
+        tkinter.messagebox.showinfo(title="Prosječna cijena smještaja za odabrane paremetre",
+                                    message="Prosječna cijena smještaja je: {:.2f}  $".format(PC2))
+
+def izracunDep(minNocenjaVar,maxNocenjaVar,brojSobaVar):
+
+    if(provjeraParametara(minNocenjaVar,maxNocenjaVar,brojSobaVar)):
+        Rec = smjestaj.objects((Q(minimum_nights__gte=minNocenjaVar) & Q(maximum_nights__lte=maxNocenjaVar)) & Q(
+            bedrooms=brojSobaVar)).count("beds")
+        tkinter.messagebox.showinfo(title="Broj kreveta",
+                                    message="Ukupni broj kreveta za odabrane parametre: {}  ".format(Rec))
+
 
 # Povezivanje s ATLAS MongoDB bazom sa setom podataka airbnb
 DB_URI = "mongodb+srv://erik:Heets7896@cluster0.47e6x.mongodb.net/sample_airbnb?retryWrites=true&w=majority"
@@ -121,12 +156,15 @@ connect(host=DB_URI)
 window=tkinter.Tk()
 # add widgets here
 
-prosjecnaCijenaCiscenja=tkinter.Button(window, text="Prosječna cijena čišćenja",command = izracunPCC() )
+brojSobaVar = tkinter.StringVar()
+minNocenjaVar = tkinter.StringVar()
+maxNocenjaVar = tkinter.StringVar()
+prosjecnaCijenaCiscenja=tkinter.Button(window, text="Prosječna cijena čišćenja",command = lambda:izracunPCC(minNocenjaVar.get(),maxNocenjaVar.get(),brojSobaVar.get()) )
 prosjecnaCijenaCiscenja.grid(column = 3, row = 0, padx= 25, pady = 30 )
 
-prosjecnaCijenaGumb=tkinter.Button(window, text="Prosječna cijena")
+prosjecnaCijenaGumb=tkinter.Button(window, text="Prosječna cijena smještaja",command = lambda:izracunPC(minNocenjaVar.get(),maxNocenjaVar.get(),brojSobaVar.get()))
 prosjecnaCijenaGumb.grid (column =3, row = 1, padx= 25, pady = 30 )
-brojRecenzijaGumb= tkinter.Button(window, text="Broj recenzija")
+brojRecenzijaGumb= tkinter.Button(window, text="Ukupni broj kreveta",command = lambda:izracunDep(minNocenjaVar.get(),maxNocenjaVar.get(),brojSobaVar.get()))
 brojRecenzijaGumb.grid(column = 3,row = 2, padx= 25, pady = 30 )
 brojSmjestajnihJedinica= tkinter.Button(window, text="Ukupni broj smještajnih jedinica \n za odabranu zemlju")
 brojSmjestajnihJedinica.grid(column = 1,row = 5, padx= 25, pady = 30 )
@@ -158,15 +196,17 @@ zemljaVar = ""
 zemljaEntry = tkinter.Entry(window,textvariable=zemljaVar)
 zemljaEntry.grid(row = 4, column =2, pady = 25, padx =20)
 
-brojSobaVar = ""
+
+
+
 brojSobaEntry = tkinter.Entry(window, textvariable=brojSobaVar)
 brojSobaEntry.grid(row=0, column=2, pady= 25)
 
-minNocenjaVar = ""
+
 minNocenjaEntry = tkinter.Entry (window, textvariable= minNocenjaVar)
 minNocenjaEntry.grid(row = 1, column =2, pady = 25)
 
-maxNocenjaVar = ""
+
 maxNocenjaEntry = tkinter.Entry(window, textvariable= maxNocenjaVar)
 maxNocenjaEntry.grid(row = 2, column =2, pady = 25, padx =20)
 
