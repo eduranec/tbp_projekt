@@ -1,9 +1,11 @@
+import sys
 import tkinter
 from tkinter import messagebox
 from mongoengine import *
 from tkinter import ttk
-
-
+from xlwt import *
+import subprocess
+import os
 class location(EmbeddedDocument):
     type = StringField()
     coordinates = ListField(DecimalField())
@@ -153,7 +155,7 @@ def izracunDep(minNocenjaVar,maxNocenjaVar,brojSobaVar):
 def izrKrevetZemlja (zemljaVar):
     if(zemljaVar !=""):
         KZ = smjestaj.objects(address__country= zemljaVar).sum("beds")
-        tkinter.messagebox.showinfo(title= "Broj kreveta", message = f"Broj kreveta za {zemljaVar} je: {KZ}")
+        tkinter.messagebox.showinfo(title= "Smještajni kapacitet", message = f"Broj kreveta za {zemljaVar} je: {KZ}")
 
 def izrSmjestajZemlja (zemljaVar):
     SZ = smjestaj.objects(address__country = zemljaVar).count()
@@ -164,6 +166,32 @@ def izrKapacitetZemlja (zemljaVar):
     tkinter.messagebox.showinfo(title="Smještajni kapacitet",
                                 message=f"Broj ljudi koji mogu biti smješteni za {zemljaVar} je: {KapZ}")
 
+def kreirajSS ():
+    wb = Workbook()
+    ws =wb.add_sheet("Podaci")
+    i=0
+    for s in smjestaj.objects():
+        j=0
+        ws.write (i,j, s._id )
+        ws.write(i, j+1, s.name)
+        ws.write(i, j+2, s.property_type)
+        ws.write(i, j+3, s.minimum_nights)
+        ws.write(i, j+4, s.maximum_nights)
+        ws.write(i, j+5, s.summary)
+        ws.write(i, j+6, s.price)
+        ws.write(i, j+7, s.security_deposit)
+        ws.write(i, j+8, s.cleaning_fee)
+        ws.write(i, j+9, s.bathrooms)
+        ws.write(i, j + 10, s.bedrooms)
+        ws.write(i, j + 11, s.accommodates)
+        ws.write(i, j + 12, s.beds)
+        i+=1
+    wb.save('Podaci.xls')
+
+
+def otvoriSS():
+    os.chdir(sys.path[0])
+    os.system('start excel.exe Podaci.xls')
 # Povezivanje s ATLAS MongoDB bazom sa setom podataka airbnb
 DB_URI = "mongodb+srv://erik:Heets7896@cluster0.47e6x.mongodb.net/sample_airbnb?retryWrites=true&w=majority"
 connect(host=DB_URI)
@@ -191,7 +219,7 @@ brojKrevetaZemlja.grid(column = 2,row = 5, padx= 25 )
 smjestajniKapacitetZemlje= tkinter.Button(window, text="Smještajni kapacitet \n za odabranu zemlju",command=lambda:izrKapacitetZemlja(zemljeCombo.get()))
 smjestajniKapacitetZemlje.grid(column = 3,row = 5, padx= 25 )
 
-otvoriDokument= tkinter.Button(window, text="Otvaranje dokumenta \n sa smještajnim jednicima")
+otvoriDokument= tkinter.Button(window, text="Otvaranje dokumenta \n sa smještajnim jednicima",command=otvoriSS)
 otvoriDokument.grid(column = 2,row = 6, pady=25 )
 
 L1 = tkinter.Label(window, text="Broj soba:" )
@@ -212,9 +240,7 @@ L5.grid(row=3, column=1, pady= 20, padx=10)
 
 
 
-#zemlje = set()
-#for s in smjestaj.objects():
-  #  zemlje.add(s.address.country)
+
 zemljeCombo = tkinter.ttk.Combobox(window)
 zemljeCombo['values']= ('Brazil', 'Portugal', 'United States', 'Canada', 'Hong Kong', 'Australia', 'Turkey', 'Spain', 'China')
 zemljeCombo.current(0)
