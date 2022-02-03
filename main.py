@@ -47,6 +47,7 @@ class smjestaj(Document):
 
 
 
+
 class location(Document):
     type = StringField()
     coordinates = ListField(DecimalField())
@@ -108,16 +109,68 @@ class host(Document):
     review_scores = ReferenceField('review_scores')
     reviews = ReferenceField('reviews')
 
+def izracunPCC():
+    return
 
 # Povezivanje s ATLAS MongoDB bazom sa setom podataka airbnb
 DB_URI = "mongodb+srv://erik:Heets7896@cluster0.47e6x.mongodb.net/sample_airbnb?retryWrites=true&w=majority"
+connect(host=DB_URI)
 
-connect(host=DB_URI, db='sample_airbnb')
+
+
 window=tkinter.Tk()
 # add widgets here
-btn=tkinter.Button(window, text="This is Button widget")
-btn.place(x=80, y=100)
+
+prosjecnaCijenaCiscenja=tkinter.Button(window, text="Prosječna cijena čišćenja",command = izracunPCC() )
+prosjecnaCijenaCiscenja.grid(column = 3, row = 0, padx= 25, pady = 30 )
+
+prosjecnaCijenaGumb=tkinter.Button(window, text="Prosječna cijena")
+prosjecnaCijenaGumb.grid (column =3, row = 1, padx= 25, pady = 30 )
+brojRecenzijaGumb= tkinter.Button(window, text="Broj recenzija")
+brojRecenzijaGumb.grid(column = 3,row = 2, padx= 25, pady = 30 )
+brojSmjestajnihJedinica= tkinter.Button(window, text="Ukupni broj smještajnih jedinica \n za odabranu zemlju")
+brojSmjestajnihJedinica.grid(column = 1,row = 5, padx= 25, pady = 30 )
+brojKrevetaZemlja= tkinter.Button(window, text="Ukupni broj kreveta \n za odabranu zemlju")
+brojKrevetaZemlja.grid(column = 2,row = 5, padx= 25 )
+smjestajniKapacitetZemlje= tkinter.Button(window, text="Smještajni kapacitet \n za odabranu zemlju")
+smjestajniKapacitetZemlje.grid(column = 3,row = 5, padx= 25 )
+
+otvoriDokument= tkinter.Button(window, text="Otvaranje dokumenta \n sa smještajnim jednicima")
+otvoriDokument.grid(column = 2,row = 6, pady=25 )
+
+L1 = tkinter.Label(window, text="Broj soba:" )
+L1.grid(row=0, column=1, pady= 20)
+
+L2= tkinter.Label(window, text="Minimalno noćenja:" )
+L2.grid(row=1, column=1, pady= 20)
+
+L3 = tkinter.Label(window, text="Maksimalno noćenja:" )
+L3.grid(row=2, column=1, pady= 20)
+
+L4 = tkinter.Label(window, text="Zemlja smještaja:" )
+L4.grid(row=4, column=1, pady= 20)
+
+L5 = tkinter.Label(window, text="-----Analiza pojedine zemlje-----" )
+L5.grid(row=3, column=1, pady= 20, padx=10)
+
+
+zemljaVar = ""
+zemljaEntry = tkinter.Entry(window,textvariable=zemljaVar)
+zemljaEntry.grid(row = 4, column =2, pady = 25, padx =20)
+
+brojSobaVar = ""
+brojSobaEntry = tkinter.Entry(window, textvariable=brojSobaVar)
+brojSobaEntry.grid(row=0, column=2, pady= 25)
+
+minNocenjaVar = ""
+minNocenjaEntry = tkinter.Entry (window, textvariable= minNocenjaVar)
+minNocenjaEntry.grid(row = 1, column =2, pady = 25)
+
+maxNocenjaVar = ""
+maxNocenjaEntry = tkinter.Entry(window, textvariable= maxNocenjaVar)
+maxNocenjaEntry.grid(row = 2, column =2, pady = 25, padx =20)
+
 window.title('Analiza smještajnih jedinica')
-window.geometry("400x600+10+20")
+window.geometry("600x600+10+20")
 window.mainloop()
 
