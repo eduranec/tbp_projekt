@@ -192,6 +192,15 @@ def kreirajSS ():
 def otvoriSS():
     os.chdir(sys.path[0])
     os.system('start excel.exe Podaci.xls')
+
+def prosjecniTrosakZemlja(zemljaVar):
+    PTS  = smjestaj.objects(address__country = zemljaVar).average('price')
+    PTC = smjestaj.objects(address__country=zemljaVar).average('cleaning_fee')
+    PTZ = PTC.to_decimal() + PTS.to_decimal()
+    tkinter.messagebox.showinfo(title="Prosječni trošak smještaja zemlje",
+                                message="Prosječni trošak smještaja, uključujući i troškove čišćenja, je: {:.2f}".format(PTZ))
+
+
 # Povezivanje s ATLAS MongoDB bazom sa setom podataka airbnb
 DB_URI = "mongodb+srv://erik:Heets7896@cluster0.47e6x.mongodb.net/sample_airbnb?retryWrites=true&w=majority"
 connect(host=DB_URI)
@@ -210,7 +219,7 @@ prosjecnaCijenaCiscenja.grid(column = 3, row = 0, padx= 25, pady = 30 )
 
 prosjecnaCijenaGumb=tkinter.Button(window, text="Prosječna cijena smještaja",command = lambda:izracunPC(minNocenjaVar.get(),maxNocenjaVar.get(),brojSobaVar.get()))
 prosjecnaCijenaGumb.grid (column =3, row = 1, padx= 25, pady = 30 )
-brojRecenzijaGumb= tkinter.Button(window, text="Ukupni broj kreveta",command = lambda:izracunDep(minNocenjaVar.get(),maxNocenjaVar.get(),brojSobaVar.get()))
+brojRecenzijaGumb= tkinter.Button(window, text="Ukupni smještajni kapacitet",command = lambda:izracunDep(minNocenjaVar.get(),maxNocenjaVar.get(),brojSobaVar.get()))
 brojRecenzijaGumb.grid(column = 3,row = 2, padx= 25, pady = 30 )
 brojSmjestajnihJedinica= tkinter.Button(window, text="Ukupni broj smještajnih jedinica \n za odabranu zemlju", command=lambda:izrSmjestajZemlja(zemljeCombo.get()))
 brojSmjestajnihJedinica.grid(column = 1,row = 5, padx= 25, pady = 30 )
@@ -218,10 +227,10 @@ brojKrevetaZemlja= tkinter.Button(window, text="Ukupni broj kreveta \n za odabra
 brojKrevetaZemlja.grid(column = 2,row = 5, padx= 25 )
 smjestajniKapacitetZemlje= tkinter.Button(window, text="Smještajni kapacitet \n za odabranu zemlju",command=lambda:izrKapacitetZemlja(zemljeCombo.get()))
 smjestajniKapacitetZemlje.grid(column = 3,row = 5, padx= 25 )
-
 otvoriDokument= tkinter.Button(window, text="Otvaranje dokumenta \n sa smještajnim jednicima",command=otvoriSS)
 otvoriDokument.grid(column = 2,row = 6, pady=25 )
-
+prosjecniTrosakZemlje = tkinter.Button(window, text = "Prosječni trošak smještaja \n zemlje", command = lambda: prosjecniTrosakZemlja(zemljeCombo.get()))
+prosjecniTrosakZemlje.grid(column=3, row = 6, pady=25)
 L1 = tkinter.Label(window, text="Broj soba:" )
 L1.grid(row=0, column=1, pady= 20)
 
