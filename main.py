@@ -6,6 +6,9 @@ from tkinter import ttk
 from xlwt import *
 import subprocess
 import os
+from os.path import exists
+
+
 class location(EmbeddedDocument):
     type = StringField()
     coordinates = ListField(DecimalField())
@@ -167,9 +170,17 @@ def izrKapacitetZemlja (zemljaVar):
                                 message=f"Broj ljudi koji mogu biti smješteni za {zemljaVar} je: {KapZ}")
 
 def kreirajSS ():
+
     wb = Workbook()
     ws =wb.add_sheet("Podaci")
-    i=0
+    stupci = ["ID","name", "property_type","minimum_nights","maximum_nights", "summary","price", "security_deposit","cleaning_fee", "bathrooms", "bedrooms", "accommodates", "beds", "country","street" , "host_name", "host_identity_verified", "review_score","property_type"]
+
+    j=0
+    for stup in stupci:
+        ws.write(0, j, stup)
+        j+=1
+
+    i=1
     for s in smjestaj.objects():
         j=0
         ws.write (i,j, s._id )
@@ -185,11 +196,20 @@ def kreirajSS ():
         ws.write(i, j + 10, s.bedrooms)
         ws.write(i, j + 11, s.accommodates)
         ws.write(i, j + 12, s.beds)
+        ws.write(i, j + 13, s.address.country)
+        ws.write(i, j + 14, s.address.street)
+        ws.write(i, j + 15, s.host.host_name)
+        ws.write(i, j + 16, s.host.host_identity_verified)
+        ws.write(i, j + 17, s.review_scores.review_scores_value)
+        ws.write(i, j + 18, s.property_type)
         i+=1
     wb.save('Podaci.xls')
 
 
 def otvoriSS():
+    if not exists('Podaci.xls'):
+        kreirajSS()
+
     os.chdir(sys.path[0])
     os.system('start excel.exe Podaci.xls')
 
@@ -214,15 +234,16 @@ brojSobaVar = tkinter.StringVar()
 minNocenjaVar = tkinter.StringVar()
 maxNocenjaVar = tkinter.StringVar()
 zemljaVar = tkinter.StringVar()
+
 prosjecnaCijenaCiscenja=tkinter.Button(window, text="Prosječna cijena čišćenja",command = lambda:izracunPCC(minNocenjaVar.get(),maxNocenjaVar.get(),brojSobaVar.get()) )
 prosjecnaCijenaCiscenja.grid(column = 3, row = 0, padx= 25, pady = 30 )
-
 prosjecnaCijenaGumb=tkinter.Button(window, text="Prosječna cijena smještaja",command = lambda:izracunPC(minNocenjaVar.get(),maxNocenjaVar.get(),brojSobaVar.get()))
 prosjecnaCijenaGumb.grid (column =3, row = 1, padx= 25, pady = 30 )
 brojRecenzijaGumb= tkinter.Button(window, text="Ukupni smještajni kapacitet",command = lambda:izracunDep(minNocenjaVar.get(),maxNocenjaVar.get(),brojSobaVar.get()))
 brojRecenzijaGumb.grid(column = 3,row = 2, padx= 25, pady = 30 )
 brojSmjestajnihJedinica= tkinter.Button(window, text="Ukupni broj smještajnih jedinica \n za odabranu zemlju", command=lambda:izrSmjestajZemlja(zemljeCombo.get()))
 brojSmjestajnihJedinica.grid(column = 1,row = 5, padx= 25, pady = 30 )
+
 brojKrevetaZemlja= tkinter.Button(window, text="Ukupni broj kreveta \n za odabranu zemlju", command = lambda:izrKrevetZemlja(zemljeCombo.get()))
 brojKrevetaZemlja.grid(column = 2,row = 5, padx= 25 )
 smjestajniKapacitetZemlje= tkinter.Button(window, text="Smještajni kapacitet \n za odabranu zemlju",command=lambda:izrKapacitetZemlja(zemljeCombo.get()))
@@ -231,6 +252,7 @@ otvoriDokument= tkinter.Button(window, text="Otvaranje dokumenta \n sa smještaj
 otvoriDokument.grid(column = 2,row = 6, pady=25 )
 prosjecniTrosakZemlje = tkinter.Button(window, text = "Prosječni trošak smještaja \n zemlje", command = lambda: prosjecniTrosakZemlja(zemljeCombo.get()))
 prosjecniTrosakZemlje.grid(column=3, row = 6, pady=25)
+
 L1 = tkinter.Label(window, text="Broj soba:" )
 L1.grid(row=0, column=1, pady= 20)
 
@@ -270,6 +292,6 @@ maxNocenjaEntry = tkinter.Entry(window, textvariable= maxNocenjaVar)
 maxNocenjaEntry.grid(row = 2, column =2, pady = 25, padx =20)
 
 window.title('Analiza smještajnih jedinica')
-window.geometry("600x600+10+20")
+window.geometry("620x600+10+20")
 window.mainloop()
 
