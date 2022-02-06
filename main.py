@@ -158,7 +158,7 @@ def izracunDep(minNocenjaVar,maxNocenjaVar,brojSobaVar):
 def izrKrevetZemlja (zemljaVar):
     if(zemljaVar !=""):
         KZ = smjestaj.objects(address__country= zemljaVar).sum("beds")
-        tkinter.messagebox.showinfo(title= "Smještajni kapacitet", message = f"Broj kreveta za {zemljaVar} je: {KZ}")
+        tkinter.messagebox.showinfo(title= "Broj kreveta", message = f"Broj kreveta za {zemljaVar} je: {KZ}")
 
 def izrSmjestajZemlja (zemljaVar):
     SZ = smjestaj.objects(address__country = zemljaVar).count()
@@ -229,7 +229,6 @@ connect(host=DB_URI)
 
 window=tkinter.Tk()
 # add widgets here
-
 brojSobaVar = tkinter.StringVar()
 minNocenjaVar = tkinter.StringVar()
 maxNocenjaVar = tkinter.StringVar()
