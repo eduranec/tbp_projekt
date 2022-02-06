@@ -248,7 +248,7 @@ brojKrevetaZemlja= tkinter.Button(window, text="Ukupni broj kreveta \n za odabra
 brojKrevetaZemlja.grid(column = 2,row = 5, padx= 25 )
 smjestajniKapacitetZemlje= tkinter.Button(window, text="Smještajni kapacitet \n za odabranu zemlju",command=lambda:izrKapacitetZemlja(zemljeCombo.get()))
 smjestajniKapacitetZemlje.grid(column = 3,row = 5, padx= 25 )
-otvoriDokument= tkinter.Button(window, text="Otvaranje dokumenta \n sa smještajnim jednicima",command=otvoriSS)
+otvoriDokument= tkinter.Button(window, text="Otvaranje tabličnog kalkulatora",command=otvoriSS)
 otvoriDokument.grid(column = 2,row = 6, pady=25 )
 prosjecniTrosakZemlje = tkinter.Button(window, text = "Prosječni trošak smještaja \n zemlje", command = lambda: prosjecniTrosakZemlja(zemljeCombo.get()))
 prosjecniTrosakZemlje.grid(column=3, row = 6, pady=25)
